@@ -7,7 +7,7 @@ setup(name='webtraffic',
       author='Lance Erickson',
       author_email='lancetarn@gmail.com',
       license='MIT',
-      packages=['web_traffic'],
+      packages=['webtraffic'],
       entry_points={
           "console_scripts": ['webtraffic=webtraffic.cli:main']
       },
