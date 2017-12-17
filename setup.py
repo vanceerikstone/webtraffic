@@ -1,13 +1,16 @@
 from setuptools import setup
 
-setup(name='web_traffic',
+setup(name='webtraffic',
       version='0.1',
       description='Parse web traffic stats',
-      url='http://github.com/lancetarn/web_traffic',
+      url='http://github.com/lancetarn/webtraffic',
       author='Lance Erickson',
       author_email='lancetarn@gmail.com',
       license='MIT',
       packages=['web_traffic'],
+      entry_points={
+          "console_scripts": ['webtraffic=webtraffic.cli:main']
+      },
       install_requires=[
           "pandas",
           "requests",

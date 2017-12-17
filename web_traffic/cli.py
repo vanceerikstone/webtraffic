@@ -4,9 +4,10 @@ aggregate format.
 
 # Std Lib
 import argparse
+import sys
 
 # local/library specific
-from web_traffic.web_traffic import S3DataLoader, UserPageTimeAggregator
+from webtraffic import S3DataLoader, UserPageTimeAggregator
 
 
 def setup():
@@ -17,8 +18,6 @@ def setup():
                    metavar="us-west-2")
     p.add_argument("--list", "-l", help="List the contents of the bucket; do "
                    "not process them", action="store_true")
-    p.add_argument("--yes", "-y", help="Yes to all prompts, good for "
-                   "non-interactive execution", action="store_true")
     p.add_argument("--output", "-o", help="Path to write csv; stdout "
                    "otherwise")
 
@@ -33,8 +32,18 @@ def main():
         print("Found files:")
         for f in loader.list():
             print("  {}".format(f))
+        sys.exit(0)
+
     for csv in loader.load():
         aggregator.add_csv(csv)
+
+    output_data = aggregator.dump_csv()
+    if args.output:
+        with open(args.output, 'w') as f:
+            f.write(output_data)
+
+    else:
+        print(output_data)
 
 
 if __name__ == "__main__":
