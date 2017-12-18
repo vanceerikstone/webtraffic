@@ -44,6 +44,9 @@ class UserPageTimeAggregator():
         df = DataFrame(self.data).transpose()
         df = df.fillna(0)
         df = df.rename_axis("user_id")
+        df.index = df.index.astype(int)
+        df.sort_index(inplace=True)
+        # @todo: a line iterable might be more useful
         return df.to_csv()
 
 
@@ -62,8 +65,9 @@ class S3DataLoader():
         """Return a list of objects in the bucket.
         @todo: Paging if required
         """
+        kwargs = {"Bucket": self.bucket}
         try:
-            objects = self.s3.list_objects(Bucket=self.bucket)
+            objects = self.s3.list_objects(**kwargs)
         except EndpointConnectionError as e:
             raise ValueError("Unable to connect; bad bucket or region")
         return [o["Key"] for o in objects["Contents"]]
@@ -72,6 +76,10 @@ class S3DataLoader():
         """Loop through files in the bucket, generating a stream
         handle for each."""
         for key in self.list():
+
+            if not key.endswith(".csv"):
+                continue
+
             res = r.get(self.__construct_url(key), stream=True)
             if res.encoding is None:
                 res.encoding = 'utf-8'
