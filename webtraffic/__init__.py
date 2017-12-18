@@ -2,12 +2,15 @@
 # Std Lib
 from collections import defaultdict
 from csv import DictReader
+from logging import getLogger
 
 # Third-pary
 from boto3 import client
 from botocore.exceptions import EndpointConnectionError
 from pandas import DataFrame
 import requests as r
+
+LOG = getLogger(__name__)
 
 
 class UserPageTimeAggregator():
@@ -46,7 +49,6 @@ class UserPageTimeAggregator():
         df = df.rename_axis("user_id")
         df.index = df.index.astype(int)
         df.sort_index(inplace=True)
-        # @todo: a line iterable might be more useful
         return df.to_csv()
 
 
@@ -78,14 +80,22 @@ class S3DataLoader():
         for key in self.list():
 
             if not key.endswith(".csv"):
+                LOG.info("Skipping key: {}".format(key))
                 continue
 
-            res = r.get(self.__construct_url(key), stream=True)
+            url = self.__construct_url(key)
+            LOG.info("Requesting file at: {}".format(url))
+            res = r.get(url, stream=True)
             if res.encoding is None:
                 res.encoding = 'utf-8'
             yield res.iter_lines(decode_unicode=True)
 
     def __construct_url(self, key):
-        """@todo: handle non-conforming us-east region"""
-        return "https://s3-{}.amazonaws.com/{}/{}".format(
-            self.region, self.bucket, key)
+        if self.region == "us-east-1":
+            url = "https://s3.amazonaws.com/{}/{}".format(
+                self.bucket, self.key)
+        else:
+            url = "https://s3-{}.amazonaws.com/{}/{}".format(
+                self.region, self.bucket, key)
+
+        return url

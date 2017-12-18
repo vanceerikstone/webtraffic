@@ -4,11 +4,13 @@ aggregate format.
 
 # Std Lib
 import argparse
+import logging
 import sys
 
 # local/library specific
 from webtraffic import S3DataLoader, UserPageTimeAggregator
 
+LOG = logging.getLogger(__name__)
 
 def setup():
     p = argparse.ArgumentParser(__doc__)
@@ -20,8 +22,16 @@ def setup():
                    "not process them", action="store_true")
     p.add_argument("--output", "-o", help="Path to write csv; stdout "
                    "otherwise")
+    p.add_argument("--verbosity", "-v", help="Increase log messages; may be specified "
+                   "multiple times", action="count")
 
-    return p.parse_args()
+    args = p.parse_args()
+
+    verbosity = 4 if args.verbosity > 4 else args.verbosity
+    levels = [logging.ERROR, logging.WARN, logging.INFO, logging.DEBUG]
+    logging.basicConfig(level=levels[verbosity])
+    
+    return args
 
 
 def main():
