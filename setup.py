@@ -14,6 +14,6 @@ setup(name='webtraffic',
       install_requires=[
           "pandas",
           "requests",
-          "boto3",
+          "xmltodict",
       ],
       zip_safe=False)

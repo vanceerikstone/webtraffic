@@ -12,6 +12,7 @@ from webtraffic import S3DataLoader, UserPageTimeAggregator
 
 LOG = logging.getLogger(__name__)
 
+
 def setup():
     p = argparse.ArgumentParser(__doc__)
     p.add_argument("bucket", help="Name of the S3 bucket",
@@ -22,15 +23,15 @@ def setup():
                    "not process them", action="store_true")
     p.add_argument("--output", "-o", help="Path to write csv; stdout "
                    "otherwise")
-    p.add_argument("--verbosity", "-v", help="Increase log messages; may be specified "
-                   "multiple times", action="count")
+    p.add_argument("--verbosity", "-v", help="Increase log messages; may be "
+                   "specified multiple times", action="count")
 
     args = p.parse_args()
 
     verbosity = 4 if args.verbosity > 4 else args.verbosity
     levels = [logging.ERROR, logging.WARN, logging.INFO, logging.DEBUG]
     logging.basicConfig(level=levels[verbosity])
-    
+
     return args
 
 

@@ -5,10 +5,9 @@ from csv import DictReader
 from logging import getLogger
 
 # Third-pary
-from boto3 import client
-from botocore.exceptions import EndpointConnectionError
 from pandas import DataFrame
 import requests as r
+import xmltodict
 
 LOG = getLogger(__name__)
 
@@ -56,27 +55,39 @@ class S3DataLoader():
     """Uses requests to load S3 csv files as boto3 still
     doesn't support streaming responses by line:
     https://github.com/boto/botocore/pull/1055
+    Also it requires valid credentials even for public
+    bucket access.
     """
 
     def __init__(self, region, bucket):
         self.bucket = bucket
         self.region = region
-        self.s3 = client('s3', region)
 
     def list(self):
         """Return a list of objects in the bucket.
-        @todo: Paging if required
+        @todo: Pagination if later required
         """
-        kwargs = {"Bucket": self.bucket}
+        url = self.__construct_bucket_url()
         try:
-            objects = self.s3.list_objects(**kwargs)
-        except EndpointConnectionError as e:
+            res = r.get(url, timeout=5)
+            res.raise_for_status()
+        except r.HttpError as e:
+            LOG.debug(repr(e))
+            raise ValueError("Bucket not found or unavailable")
+        except r.ConnectionError as e:
+            LOG.debug(repr(e))
             raise ValueError("Unable to connect; bad bucket or region")
-        return [o["Key"] for o in objects["Contents"]]
+        try:
+            objects = xmltodict.parse(res.text)
+        except Exception as e:
+            LOG.debug(repr(e))
+            raise ValueError("Bad XML response received from bucket request")
+
+        return [o["Key"] for o in objects["ListBucketResult"]["Contents"]]
 
     def load(self):
-        """Loop through files in the bucket, generating a stream
-        handle for each."""
+        """Loop through files in the bucket, generating an
+        iterable stream for each."""
         for key in self.list():
 
             if not key.endswith(".csv"):
@@ -91,11 +102,13 @@ class S3DataLoader():
             yield res.iter_lines(decode_unicode=True)
 
     def __construct_url(self, key):
-        if self.region == "us-east-1":
-            url = "https://s3.amazonaws.com/{}/{}".format(
-                self.bucket, self.key)
-        else:
-            url = "https://s3-{}.amazonaws.com/{}/{}".format(
-                self.region, self.bucket, key)
+        return self.__construct_bucket_url() + "/{}".format(key)
 
+    def __construct_bucket_url(self):
+        if self.region == "us-east-1":
+            url = "https://s3.amazonaws.com/{}".format(
+                self.bucket)
+        else:
+            url = "https://s3-{}.amazonaws.com/{}".format(
+                self.region, self.bucket)
         return url
