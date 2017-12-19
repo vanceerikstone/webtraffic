@@ -10,7 +10,8 @@ Other possible enhancements are filtering bucket objects by path or name.
 
 ## Installation
 
-This package requires python 3.4+. Suggested installation is to
+This package was developed against python 3.6 but I think it should be compatible
+back to at least 3.4. Suggested installation is to
 create a virtualenv for isolation. This process varies by platform,
 but a common \*nix pattern to create a venv under the current directory
 is:
@@ -20,7 +21,7 @@ $ python3 -m venv webtraffic-env
 $ source ./webtraffic-env/bin/activate
 $ pip install -e git://github.com/vanceerikstone/webtraffic/@v0.1.1#egg=webtraffic
 ```
-
+Alternatively, you can clone this repository and `pip` install locally.
 Sorry Windows users; I do not have a machine available to verify the install for you.
 
 ## Usage
