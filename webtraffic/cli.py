@@ -28,7 +28,7 @@ def setup():
 
     args = p.parse_args()
 
-    verbosity = 4 if args.verbosity > 4 else args.verbosity
+    verbosity = 3 if args.verbosity > 3 else args.verbosity
     levels = [logging.ERROR, logging.WARN, logging.INFO, logging.DEBUG]
     logging.basicConfig(level=levels[verbosity])
 
@@ -41,18 +41,28 @@ def main():
     aggregator = UserPageTimeAggregator()
     if args.list:
         print("Found files:")
-        for f in loader.list():
-            print("  {}".format(f))
-        sys.exit(0)
+        try:
+            for f in loader.list():
+                print("  {}".format(f))
+            sys.exit(0)
+        # This is pretty blunt but its better than stack traces
+        except Exception as e:
+            LOG.debug(e, exc_info=True)
+            LOG.critical(e)
+            sys.exit(1)
 
-    for csv in loader.load():
-        aggregator.add_csv(csv)
+    try:
+        for csv in loader.load():
+            aggregator.add_csv(csv)
+    except Exception as e:
+        LOG.debug(e, exc_info=True)
+        LOG.critical(e)
+        sys.exit(1)
 
     output_data = aggregator.dump_csv()
     if args.output:
         with open(args.output, 'w') as f:
             f.write(output_data)
-
     else:
         print(output_data)
 
