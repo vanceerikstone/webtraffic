@@ -18,7 +18,7 @@ is:
 ```
 $ python3 -m venv webtraffic-env
 $ source ./webtraffic-env/bin/activate
-$ pip install -e git://github.com/vanceerikstone/webtraffic/@v0.1.0#egg=webtraffic
+$ pip install -e git://github.com/vanceerikstone/webtraffic/@v0.1.1#egg=webtraffic
 ```
 
 Sorry Windows users; I do not have a machine available to verify the install for you.
