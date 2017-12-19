@@ -20,9 +20,18 @@ $ python3 -m venv webtraffic-env
 $ source ./webtraffic-env/bin/activate
 $ pip install -e git://github.com/vanceerikstone/webtraffic/@v0.1.0#egg=webtraffic
 ```
+
+Sorry Windows users; I do not have a machine available to verify the install for you.
+
+## Usage
 After installation, when the venv is active, there should be a 
 `webtraffic` executable in your $PATH
 
 `webtraffic -h` is available for help.
 
-Sorry Windows users; I do not have a machine available to verify the install for you.
+### List/verify objects in a bucket
+`webtraffic -l my-bucket us-east-1`
+
+### Process bucket contents to file
+`webtraffic -o writeable/path/filename.csv my-bucket us-east-1`
+
